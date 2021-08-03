@@ -10,13 +10,17 @@ use Mix.Config
 config :loyalty_api,
   ecto_repos: [LoyaltyApi.Repo]
 
+config :loyalty_api,
+       LoyaltyApi.Repo,
+       migration_primary_key: [name: :id, type: :binary_id]
+
 # Configures the endpoint
 config :loyalty_api, LoyaltyApiWeb.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "pF0LGNwGWZ2CISDWwtmfJjZGvj5L9QVEDOHwngk23ZfhqL+uFzJWF2QWtocq56bC",
+  secret_key_base: "MMBDKl36I/g9tLcio/u2K07YN+he6cyipnZzPzHFAut5YThFLTLvI+YwXNjzF9oZ",
   render_errors: [view: LoyaltyApiWeb.ErrorView, accepts: ~w(json), layout: false],
   pubsub_server: LoyaltyApi.PubSub,
-  live_view: [signing_salt: "pv6iMrCH"]
+  live_view: [signing_salt: "G8HHdDWW"]
 
 # Configures Elixir's Logger
 config :logger, :console,

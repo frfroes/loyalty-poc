@@ -7,7 +7,7 @@ defmodule LoyaltyApiWeb.Endpoint do
   @session_options [
     store: :cookie,
     key: "_loyalty_api_key",
-    signing_salt: "G9KvDoLS"
+    signing_salt: "FYC5WVRJ"
   ]
 
   socket "/socket", LoyaltyApiWeb.UserSocket,
