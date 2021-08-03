@@ -14,6 +14,12 @@ defmodule LoyaltyApi.Factory do
     }
   end
 
+  def build(:brand) do
+    %LoyaltyApi.Accounts.Brand{
+      name: "Brand #{System.unique_integer()}"
+    }
+  end
+
   # Convenience API
 
   def build(factory_name, attributes) do

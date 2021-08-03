@@ -18,15 +18,23 @@ defmodule LoyaltyApi.AccountsTest do
   end
 
   describe "create_customer/1" do
-    @valid_attrs %{
-      name: "Bruce Dickson",
-      email: "bruce.dickson@ironmainden.com",
-      phone_number: "+66 666-666",
-      language: "en"
-    }
+    defp valid_attrs() do
+      brand = insert!(:brand)
+
+      %{
+        name: "Bruce Dickson",
+        email: "bruce.dickson@ironmainden.com",
+        phone_number: "+66 666-666",
+        language: "en",
+        brand_id: brand.id
+      }
+    end
 
     test "with valid data creates a customer" do
-      assert {:ok, %Customer{} = customer} = Accounts.create_customer(@valid_attrs)
+      assert {:ok, %Customer{} = customer} =
+               valid_attrs()
+               |> Accounts.create_customer()
+
       assert customer.name == "Bruce Dickson"
       assert customer.email == "bruce.dickson@ironmainden.com"
       assert customer.phone_number == "+66 666-666"
@@ -35,16 +43,16 @@ defmodule LoyaltyApi.AccountsTest do
 
     test "with missing data returns error changeset" do
       assert {:error, %Ecto.Changeset{} = changeset} =
-               @valid_attrs
-               |> Map.drop([:name])
+               valid_attrs()
+               |> Map.drop([:brand_id])
                |> Accounts.create_customer()
 
-      assert errors_on(changeset) == %{name: ["can't be blank"]}
+      assert errors_on(changeset) == %{brand_id: ["can't be blank"]}
     end
 
     test "with invalid email returns error changeset" do
       assert {:error, %Ecto.Changeset{} = changeset} =
-               @valid_attrs
+               valid_attrs()
                |> Map.put(:email, "crazy mail")
                |> Accounts.create_customer()
 
@@ -53,7 +61,7 @@ defmodule LoyaltyApi.AccountsTest do
 
     test "with invalid phone number returns error changeset" do
       assert {:error, %Ecto.Changeset{} = changeset} =
-               @valid_attrs
+               valid_attrs()
                |> Map.put(:phone_number, "191AABC1232")
                |> Accounts.create_customer()
 

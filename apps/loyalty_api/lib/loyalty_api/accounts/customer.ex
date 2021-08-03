@@ -16,6 +16,8 @@ defmodule LoyaltyApi.Accounts.Customer do
     field :name, :string
     field :phone_number, :string
 
+    belongs_to :brand, Brand, type: :binary_id
+
     timestamps()
   end
 
@@ -25,8 +27,8 @@ defmodule LoyaltyApi.Accounts.Customer do
   @doc false
   def changeset(customer, attrs) do
     customer
-    |> cast(attrs, [:name, :email, :phone_number, :language])
-    |> validate_required([:name, :email, :phone_number, :language])
+    |> cast(attrs, [:name, :email, :phone_number, :language, :brand_id])
+    |> validate_required([:name, :email, :phone_number, :language, :brand_id])
     |> unique_constraint(:email)
     |> validate_format(:email, @email_regex)
     |> validate_format(:phone_number, @phone_number_regex)
