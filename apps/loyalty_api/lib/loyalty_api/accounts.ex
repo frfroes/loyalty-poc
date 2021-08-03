@@ -24,6 +24,7 @@ defmodule LoyaltyApi.Accounts do
       nil
 
   """
+  @spec get_customer(Ecto.UUID.t()) :: Customer.t() | nil
   def get_customer(id), do: Repo.get(Customer, id)
 
   @doc """
@@ -38,6 +39,7 @@ defmodule LoyaltyApi.Accounts do
       {:error, %Ecto.Changeset{}}
 
   """
+  @spec get_customer(map()) :: {:ok, Customer.t()} | {:error, Ecto.Changeset.t()}
   def create_customer(attrs \\ %{}) do
     %Customer{}
     |> Customer.changeset(attrs)

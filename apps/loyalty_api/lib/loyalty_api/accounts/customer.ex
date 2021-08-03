@@ -2,6 +2,14 @@ defmodule LoyaltyApi.Accounts.Customer do
   use LoyaltyApi.EctoSchema
   import Ecto.Changeset
 
+  @type t :: %__MODULE__{
+          id: Ecto.UUID.t(),
+          email: String.t(),
+          language: String.t(),
+          name: String.t(),
+          phone_number: String.t()
+        }
+
   schema "customers" do
     field :email, :string
     field :language, :string
