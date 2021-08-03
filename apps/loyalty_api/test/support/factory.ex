@@ -20,6 +20,18 @@ defmodule LoyaltyApi.Factory do
     }
   end
 
+  def build(:points) do
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+    future = %{now | day: now.day + 10}
+
+    %LoyaltyApi.Loyalty.Points{
+      amount: System.unique_integer([:positive]),
+      code: "CODE12345",
+      expiration_date: future,
+      redeemed: false
+    }
+  end
+
   # Convenience API
 
   def build(factory_name, attributes) do
