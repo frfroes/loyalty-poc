@@ -1,10 +1,19 @@
 use Mix.Config
 
-# Configure your database
+# Configure loyalty_api database
 config :loyalty_api, LoyaltyApi.Repo,
   username: "postgres",
   password: "postgres",
   database: "loyalty_api_dev",
+  hostname: "localhost",
+  show_sensitive_data_on_connection_error: true,
+  pool_size: 10
+
+# Configure blockchain database
+config :blockchain, Blockchain.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "blockchain_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

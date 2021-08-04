@@ -2,6 +2,8 @@ defmodule LoyaltyApi.Accounts.Customer do
   use LoyaltyApi.EctoSchema
   import Ecto.Changeset
 
+  alias LoyaltyApi.Accounts.Brand
+
   @type t :: %__MODULE__{
           id: Ecto.UUID.t(),
           email: String.t(),
@@ -11,12 +13,12 @@ defmodule LoyaltyApi.Accounts.Customer do
         }
 
   schema "customers" do
-    field :email, :string
-    field :language, :string
-    field :name, :string
-    field :phone_number, :string
+    field(:email, :string)
+    field(:language, :string)
+    field(:name, :string)
+    field(:phone_number, :string)
 
-    belongs_to :brand, Brand, type: :binary_id
+    belongs_to(:brand, Brand, type: :binary_id)
 
     timestamps()
   end

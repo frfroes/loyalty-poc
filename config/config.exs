@@ -22,6 +22,9 @@ config :loyalty_api, LoyaltyApiWeb.Endpoint,
   pubsub_server: LoyaltyApi.PubSub,
   live_view: [signing_salt: "G8HHdDWW"]
 
+config :blockchain,
+  ecto_repos: [Blockchain.Repo]
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

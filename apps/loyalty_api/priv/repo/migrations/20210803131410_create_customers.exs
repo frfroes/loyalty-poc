@@ -9,8 +9,8 @@ defmodule LoyaltyApi.Repo.Migrations.CreateCustomers do
       add(:language, :string)
 
       timestamps()
-
-      unique_index(:customers, :email)
     end
+
+    create(unique_index(:customers, [:email]))
   end
 end

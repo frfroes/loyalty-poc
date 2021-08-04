@@ -18,5 +18,12 @@ config :loyalty_api, LoyaltyApiWeb.Endpoint,
   http: [port: 4002],
   server: false
 
+config :blockchain, Blockchain.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "blockchain_test#{System.get_env("MIX_TEST_PARTITION")}",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
+
 # Print only warnings and errors during test
 config :logger, level: :warn
