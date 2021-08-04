@@ -5,6 +5,10 @@ defmodule LoyaltyApi.MixProject do
     [
       app: :loyalty_api,
       version: "0.1.0",
+      build_path: "../../_build",
+      config_path: "../../config/config.exs",
+      deps_path: "../../deps",
+      lockfile: "../../mix.lock",
       elixir: "~> 1.7",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix] ++ Mix.compilers(),
@@ -35,14 +39,14 @@ defmodule LoyaltyApi.MixProject do
     [
       {:phoenix, "~> 1.5.9"},
       {:phoenix_ecto, "~> 4.1"},
-      {:ecto_sql, "~> 3.4"},
-      {:postgrex, ">= 0.0.0"},
       {:phoenix_live_dashboard, "~> 0.4"},
       {:telemetry_metrics, "~> 0.4"},
       {:telemetry_poller, "~> 0.4"},
       {:jason, "~> 1.0"},
       {:plug_cowboy, "~> 2.0"},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:postgrex, ">= 0.0.0"},
+      {:ecto_sql, "~> 3.4"},
+      {:blockchain, in_umbrella: true}
     ]
   end
 
