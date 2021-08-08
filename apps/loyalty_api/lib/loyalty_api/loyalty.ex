@@ -7,9 +7,11 @@ defmodule LoyaltyApi.Loyalty do
   alias LoyaltyApi.Repo
 
   alias LoyaltyApi.Loyalty.Points
+  alias LoyaltyApi.Loyalty.Transaction
   alias LoyaltyApi.Accounts.Customer
 
   @valid_code ~r/^[a-zA-Z0-9]+$/
+  defp blockchain, do: Application.get_env(:loyalty_api, :blockchain_api, Blockchain)
 
   @doc """
   Redeems `Points` by a `Customer` given it's code.
@@ -30,9 +32,11 @@ defmodule LoyaltyApi.Loyalty do
     with :ok <- validate_code(code),
          points <- Repo.get_by(Points, code: code),
          :ok <- validate_points(points),
-         :ok <- credit_points(customer, points),
-         {:ok, points} <- set_as_redeemed(points) do
-      {:ok, points}
+         {:ok, transaction_hash} <-
+           blockchain().run_transaction(:credit, customer.id, points.amount),
+         {:ok, %{points: points, transaction: transaction}} <-
+           save_transaction(points, transaction_hash) do
+      {:ok, {points, transaction.hash}}
     end
   end
 
@@ -62,14 +66,18 @@ defmodule LoyaltyApi.Loyalty do
     end
   end
 
-  defp credit_points(%Customer{} = _customer, %Points{} = _points) do
-    # Will credito points to user throught the blockchain
-    :ok
-  end
+  # Even though I'm using a DB transaction here the name is more in the context of the entity `Transaction`.
+  defp save_transaction(%Points{} = points, {blockchain_data, hash}) do
+    transaction = %Transaction{
+      customer_id: blockchain_data.user_uid,
+      hash: hash,
+      operation: :redeem_points,
+      details: Map.put(blockchain_data, :code, points.code)
+    }
 
-  defp set_as_redeemed(%Points{} = points) do
-    points
-    |> Points.changeset(%{redeemed: true})
-    |> Repo.update()
+    Ecto.Multi.new()
+    |> Ecto.Multi.insert(:transaction, Transaction.changeset(transaction, %{}))
+    |> Ecto.Multi.update(:points, Points.changeset(points, %{redeemed: true}))
+    |> Repo.transaction()
   end
 end

@@ -46,6 +46,7 @@ defmodule LoyaltyApi.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:postgrex, ">= 0.0.0"},
       {:ecto_sql, "~> 3.4"},
+      {:mox, "~> 1.0", only: :test},
       {:blockchain, in_umbrella: true}
     ]
   end
