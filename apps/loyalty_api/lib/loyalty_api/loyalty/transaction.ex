@@ -4,13 +4,15 @@ defmodule LoyaltyApi.Loyalty.Transaction do
   alias LoyaltyApi.Accounts.Customer
 
   @operation_values [
-    :redeem_points
+    :redeem_points,
+    :claim_coupon
   ]
 
   schema "transactions" do
-    field(:details, :map)
+    field(:blockchain_details, :map)
     field(:hash, :string)
     field(:operation, Ecto.Enum, values: @operation_values)
+    field(:entity_id, :binary_id)
 
     belongs_to(:customer, Customer, type: :binary_id)
 
@@ -20,8 +22,8 @@ defmodule LoyaltyApi.Loyalty.Transaction do
   @doc false
   def changeset(transaction, attrs) do
     transaction
-    |> cast(attrs, [:hash, :details, :operation, :customer_id])
-    |> validate_required([:hash, :details, :operation, :customer_id])
+    |> cast(attrs, [:hash, :blockchain_details, :operation, :customer_id, :entity_id])
+    |> validate_required([:hash, :blockchain_details, :operation, :customer_id])
     |> unique_constraint(:hash)
   end
 end

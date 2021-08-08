@@ -7,6 +7,7 @@ defmodule LoyaltyApi.Loyalty do
   alias LoyaltyApi.Repo
 
   alias LoyaltyApi.Loyalty.Points
+  alias LoyaltyApi.Loyalty.Coupon
   alias LoyaltyApi.Loyalty.Transaction
   alias LoyaltyApi.Accounts.Customer
 
@@ -19,15 +20,16 @@ defmodule LoyaltyApi.Loyalty do
   Points can be redeemed given both the code and the points, it can only happen once and before their expiration date.
   If succfully redeemed they are credited to the Customer's account and marked as so.
 
-  It returns the redeemed Points or a validation error.
+  It returns the redeemed Points along witht the blockchain hash or a validation error.
 
   ## Examples
 
       iex> redeem_points(customer, code)
-      {:ok, %Points{}}
+      {:ok, {%Points{}, "transaction_hash"}}
 
   """
-  @spec redeem_points(Customer.t(), String.t()) :: {:ok, Points.t()} | {:error, atom()}
+  @spec redeem_points(Customer.t(), String.t()) ::
+          {:ok, {Points.t(), binary()}} | {:error, atom()}
   def redeem_points(customer, code) when is_binary(code) do
     with :ok <- validate_code(code),
          points <- Repo.get_by(Points, code: code),
@@ -66,18 +68,66 @@ defmodule LoyaltyApi.Loyalty do
     end
   end
 
+
+  @doc """
+  Claims a coupon for a user.
+
+  When claiming a `Coupon` its costs it's debited from the customer's balance trhought the blockchain and the customer is notified by email.
+  `Coupeons` can be claimed by an unlimented amount of user.
+
+  It returns the claimed Coupon along witht the blockchain hash or a validation error.
+
+  ## Examples
+
+      iex> redeem_points(customer, code)
+      {:ok, {%Points{}, "transaction_hash"}}
+
+  """
+  @spec claim_coumpon(Customer.t(), Coupon.t()) ::
+          {:ok, {Coupon.t(), binary()}} | {:error, atom()}
+  def claim_coumpon(customer, coupon) do
+    with {:ok, transaction_hash} <-
+           blockchain().run_transaction(:debit, customer.id, coupon.cost),
+         {:ok, transaction} <- save_transaction(coupon, transaction_hash),
+         :ok <- notify_customer(customer, coupon) do
+      {:ok, {coupon, transaction.hash}}
+    end
+  end
+
+  defp notify_customer(_customer, _coupon) do
+    Task.async(fn ->
+      # Call to email API will happen here
+      :not_implemented
+    end)
+
+    :ok
+  end
+
   # Even though I'm using a DB transaction here the name is more in the context of the entity `Transaction`.
   defp save_transaction(%Points{} = points, {blockchain_data, hash}) do
     transaction = %Transaction{
       customer_id: blockchain_data.user_uid,
       hash: hash,
       operation: :redeem_points,
-      details: Map.put(blockchain_data, :code, points.code)
+      entity_id: points.id,
+      blockchain_details: blockchain_data
     }
 
     Ecto.Multi.new()
     |> Ecto.Multi.insert(:transaction, Transaction.changeset(transaction, %{}))
     |> Ecto.Multi.update(:points, Points.changeset(points, %{redeemed: true}))
     |> Repo.transaction()
+  end
+
+  defp save_transaction(%Coupon{} = coupon, {blockchain_data, hash}) do
+    %Transaction{
+      customer_id: blockchain_data.user_uid,
+      hash: hash,
+      operation: :claim_coupon,
+      entity_id: coupon.id,
+      blockchain_details: blockchain_data
+    }
+    |> Transaction.changeset(%{})
+    |> Repo.insert()
   end
 end

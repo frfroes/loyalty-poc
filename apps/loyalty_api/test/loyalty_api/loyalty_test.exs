@@ -6,6 +6,7 @@ defmodule LoyaltyApi.LoyaltyTest do
 
   alias LoyaltyApi.Loyalty
   alias LoyaltyApi.Loyalty.Points
+  alias LoyaltyApi.Loyalty.Coupon
   alias LoyaltyApi.Loyalty.Transaction
 
   defp mock_transaction_hash(operation, user_uid, amount) do
@@ -51,9 +52,9 @@ defmodule LoyaltyApi.LoyaltyTest do
 
       assert transaction.customer_id == customer.id
       assert transaction.operation == :redeem_points
-      assert transaction.details["code"] == points.code
-      assert transaction.details["amount"] == points.amount
-      assert transaction.details["operation"] == "credit"
+      assert transaction.entity_id == points.id
+      assert transaction.blockchain_details["amount"] == points.amount
+      assert transaction.blockchain_details["operation"] == "credit"
     end
 
     test "returns error when code is invalid" do
@@ -71,6 +72,40 @@ defmodule LoyaltyApi.LoyaltyTest do
       assert {:error, :already_used} = Loyalty.redeem_points(customer, points.code)
       points = insert!(:points, code: "EXPIRED89", expiration_date: ~U[1995-08-13 21:57:30Z])
       assert {:error, :date_expired} = Loyalty.redeem_points(customer, points.code)
+    end
+  end
+
+  describe "claim_coumpon" do
+    test "customer claims coumpon when all is valid" do
+      customer = insert!(:customer)
+      coumpon = insert!(:coupon)
+
+      BlockchainMock
+      |> expect(:run_transaction, fn operation, user_uid, amount ->
+        {:ok, mock_transaction_hash(operation, user_uid, amount)}
+      end)
+
+      assert {:ok, {%Coupon{}, hash}} = Loyalty.claim_coumpon(customer, coumpon)
+
+      assert %Transaction{} = transaction = Repo.get_by(Transaction, hash: hash)
+
+      assert transaction.customer_id == customer.id
+      assert transaction.operation == :claim_coupon
+      assert transaction.entity_id == coumpon.id
+      assert transaction.blockchain_details["amount"] == coumpon.cost
+      assert transaction.blockchain_details["operation"] == "debit"
+    end
+
+    test "returns error when blockchain does not process transaction" do
+      customer = build(:customer)
+      coumpon = insert!(:coupon)
+
+      BlockchainMock
+      |> expect(:run_transaction, fn _operation, _user_uid, _amount ->
+        {:error, :not_enough_funds}
+      end)
+
+      assert {:error, :not_enough_funds} = Loyalty.claim_coumpon(customer, coumpon)
     end
   end
 end

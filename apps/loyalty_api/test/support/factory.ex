@@ -20,6 +20,13 @@ defmodule LoyaltyApi.Factory do
     }
   end
 
+  def build(:coupon) do
+    %LoyaltyApi.Loyalty.Coupon{
+      description: "Super great 20% discount",
+      cost: 42
+    }
+  end
+
   def build(:points) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
     future = %{now | day: now.day + 10}

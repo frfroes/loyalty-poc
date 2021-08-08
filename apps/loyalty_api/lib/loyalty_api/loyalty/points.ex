@@ -9,6 +9,7 @@ defmodule LoyaltyApi.Loyalty.Points do
           expiration_date: DateTime.t(),
           redeemed: boolean()
         }
+
   schema "points" do
     field(:amount, :integer)
     field(:code, :string)
