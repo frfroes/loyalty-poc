@@ -13,4 +13,14 @@ defmodule LoyaltyApiWeb.ErrorHelpers do
       String.replace(acc, "%{#{key}}", to_string(value))
     end)
   end
+
+  @doc """
+  Renders default error view
+  """
+  def render_error(conn, error) do
+    conn
+    |> Plug.Conn.put_status(:bad_request)
+    |> Phoenix.Controller.put_view(LoyaltyApiWeb.ErrorView)
+    |> Phoenix.Controller.render("error.json", error: error)
+  end
 end
