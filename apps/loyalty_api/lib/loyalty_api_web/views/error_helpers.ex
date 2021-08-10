@@ -17,6 +17,13 @@ defmodule LoyaltyApiWeb.ErrorHelpers do
   @doc """
   Renders default error view
   """
+  def render_error(conn, %Ecto.Changeset{} = error) do
+    conn
+    |> Plug.Conn.put_status(:bad_request)
+    |> Phoenix.Controller.put_view(LoyaltyApiWeb.ChangesetView)
+    |> Phoenix.Controller.render("error.json", changeset: error)
+  end
+
   def render_error(conn, error) do
     conn
     |> Plug.Conn.put_status(:bad_request)

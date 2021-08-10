@@ -1,6 +1,10 @@
 defmodule LoyaltyApiWeb.Router do
   use LoyaltyApiWeb, :router
 
+  pipeline :api do
+    plug(:accepts, ["json"])
+  end
+
   pipeline :customer do
     plug(:accepts, ["json"])
     plug(LoyaltyApiWeb.Plugs.CustomerAuth)
@@ -11,6 +15,12 @@ defmodule LoyaltyApiWeb.Router do
 
     post("/points/redeem/:code", LoyaltyController, :redeem_points)
     post("/coupon/claim/:uid", LoyaltyController, :claim_coupon)
+  end
+
+  scope "/accounts", LoyaltyApiWeb do
+    pipe_through(:api)
+
+    post("/customer", AccountsController, :create_customer)
   end
 
   # Enables LiveDashboard only for development
