@@ -20,7 +20,7 @@ defmodule LoyaltyApi.LoyaltyTest do
     {transaction, inspect(transaction)}
   end
 
-  describe "redeem_points/1" do
+  describe "redeem_points/2" do
     test "when all is valid point is redeemed" do
       customer = insert!(:customer)
       points = insert!(:points)
@@ -75,7 +75,7 @@ defmodule LoyaltyApi.LoyaltyTest do
     end
   end
 
-  describe "claim_coumpon" do
+  describe "claim_coumpon/2" do
     test "customer claims coumpon when all is valid" do
       customer = insert!(:customer)
       coumpon = insert!(:coupon)
@@ -106,6 +106,33 @@ defmodule LoyaltyApi.LoyaltyTest do
       end)
 
       assert {:error, :not_enough_funds} = Loyalty.claim_coumpon(customer, coumpon)
+    end
+  end
+
+  describe "list_transactions_by/1" do
+    test "return transactions of customer" do
+      customer_a = insert!(:customer)
+      customer_b = insert!(:customer)
+
+      insert!(:points_transaction, %{customer_id: customer_a.id})
+      insert!(:points_transaction, %{customer_id: customer_b.id})
+      insert!(:coupon_transaction, %{customer_id: customer_a.id})
+      insert!(:coupon_transaction, %{customer_id: customer_b.id})
+      insert!(:points_transaction, %{customer_id: customer_a.id})
+
+      transactions = Loyalty.list_transactions_by(%{customer_uid: customer_a.id})
+      assert length(transactions) == 3
+      assert Enum.all?(transactions, &(&1.customer_id == customer_a.id))
+    end
+
+    test "return transactions with populated points or coupons" do
+      customer = insert!(:customer)
+
+      insert!(:points_transaction, %{customer_id: customer.id})
+      insert!(:coupon_transaction, %{customer_id: customer.id})
+
+      assert [%{points: %Points{}}, %{coupon: %Coupon{}}] =
+               Loyalty.list_transactions_by(%{customer_uid: customer.id})
     end
   end
 end

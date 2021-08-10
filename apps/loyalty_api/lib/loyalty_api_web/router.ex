@@ -15,6 +15,7 @@ defmodule LoyaltyApiWeb.Router do
 
     post("/points/redeem/:code", LoyaltyController, :redeem_points)
     post("/coupon/claim/:uid", LoyaltyController, :claim_coupon)
+    get("/transactions", LoyaltyController, :get_transactions)
   end
 
   scope "/accounts", LoyaltyApiWeb do

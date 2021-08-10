@@ -7,6 +7,5 @@ defmodule LoyaltyApi.Repo.Migrations.CreateBrands do
 
       timestamps()
     end
-
   end
 end

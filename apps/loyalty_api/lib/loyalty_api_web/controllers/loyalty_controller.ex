@@ -31,6 +31,12 @@ defmodule LoyaltyApiWeb.LoyaltyController do
     end
   end
 
+  def get_transactions(conn, _params) do
+    customer = conn.assigns.customer
+    transactions = Loyalty.list_transactions_by(%{customer_uid: customer.id})
+    render(conn, "index.json", transactions: transactions)
+  end
+
   defp find_coupon(uid) do
     case Repo.get(Loyalty.Coupon, uid) do
       nil -> {:error, :coupon_not_found}

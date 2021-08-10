@@ -68,7 +68,6 @@ defmodule LoyaltyApi.Loyalty do
     end
   end
 
-
   @doc """
   Claims a coupon for a user.
 
@@ -129,5 +128,15 @@ defmodule LoyaltyApi.Loyalty do
     }
     |> Transaction.changeset(%{})
     |> Repo.insert()
+  end
+
+  def list_transactions_by(%{customer_uid: customer_id}) do
+    Transaction
+    |> where([t], t.customer_id == ^customer_id)
+    |> join(:left, [t], p in Points, on: p.id == t.entity_id)
+    |> join(:left, [t, p], c in Coupon, on: c.id == t.entity_id)
+    |> select([t, p, c], %{t | points: p, coupon: c})
+    |> order_by([t, _p, _c], desc: t.inserted_at)
+    |> Repo.all()
   end
 end

@@ -104,4 +104,54 @@ defmodule LoyaltyApiWeb.LoyaltyControllerTest do
       assert %{"error" => "Not enough funds"} = json_response(conn, 400)
     end
   end
+
+  describe "GET /transactions" do
+    test "renders claimed payload when is succefull", %{conn: conn} do
+      customer = insert!(:customer)
+      insert!(:points_transaction, %{customer_id: customer.id})
+      insert!(:coupon_transaction, %{customer_id: customer.id})
+
+      path = Routes.loyalty_path(conn, :get_transactions)
+
+      conn =
+        conn
+        |> put_req_header("authorization", "Bearer #{customer.id}")
+        |> get(path, nil)
+
+      assert %{
+               "data" => [
+                 %{
+                   "blockchain_details" => _,
+                   "customer_id" => _,
+                   "entity_id" => _,
+                   "hash" => _,
+                   "id" => _,
+                   "inserted_at" => _,
+                   "operation" => _,
+                   "points" => %{
+                     "amount" => _,
+                     "code" => _,
+                     "expiration_date" => _,
+                     "id" => _
+                   }
+                 },
+                 %{
+                   "blockchain_details" => _,
+                   "coupon" => %{
+                     "cost" => _,
+                     "description" => _,
+                     "id" => _
+                   },
+                   "customer_id" => _,
+                   "entity_id" => _,
+                   "hash" => _,
+                   "id" => _,
+                   "inserted_at" => _,
+                   "operation" => _,
+                   "updated_at" => _
+                 }
+               ]
+             } = json_response(conn, 200)
+    end
+  end
 end

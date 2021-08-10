@@ -27,6 +27,38 @@ defmodule LoyaltyApi.Factory do
     }
   end
 
+  def build(:coupon_transaction) do
+    coupon = insert!(:coupon)
+
+    %LoyaltyApi.Loyalty.Transaction{
+      blockchain_details: %{
+        "amount" => 65,
+        "operation" => "debit",
+        "timestamp" => 1_628_538_970_737,
+        "user_uid" => "60791adc-1527-487e-a14f-f7343227b4d7"
+      },
+      hash: "HASH#{coupon.id}",
+      operation: :claim_coupon,
+      entity_id: coupon.id
+    }
+  end
+
+  def build(:points_transaction) do
+    points = insert!(:points, %{code: "CODE#{System.unique_integer()}"})
+
+    %LoyaltyApi.Loyalty.Transaction{
+      blockchain_details: %{
+        "amount" => 65,
+        "operation" => "credit",
+        "timestamp" => 1_628_538_970_737,
+        "user_uid" => "60791adc-1527-487e-a14f-f7343227b4d7"
+      },
+      hash: "HASH#{points.id}",
+      operation: :claim_coupon,
+      entity_id: points.id
+    }
+  end
+
   def build(:points) do
     now = DateTime.utc_now() |> DateTime.truncate(:second)
     future = %{now | day: now.day + 10}
